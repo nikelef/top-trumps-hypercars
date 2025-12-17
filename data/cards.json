@@ -1,0 +1,533 @@
+[
+  {
+    "id": "A1",
+    "name": "Bugatti Chiron SS 300+",
+    "image": "A1.png",
+    "attributes": {
+      "top_speed": 490,
+      "acceleration": 2.4,
+      "horsepower": 1600,
+      "rpm": 7100,
+      "release_year": 2019,
+      "weight": 1995,
+      "engine_size": 8.0,
+      "price": 3900000
+    }
+  },
+  {
+    "id": "A2",
+    "name": "Bugatti Tourbillion",
+    "image": "A2.png",
+    "attributes": {
+      "top_speed": 445,
+      "acceleration": 2.0,
+      "horsepower": 1780,
+      "rpm": 9000,
+      "release_year": 2025,
+      "weight": 1990,
+      "engine_size": 8.3,
+      "price": 3900000
+    }
+  },
+  {
+    "id": "A3",
+    "name": "Bugatti Veyron SS",
+    "image": "A3.png",
+    "attributes": {
+      "top_speed": 430,
+      "acceleration": 2.5,
+      "horsepower": 1190,
+      "rpm": 6400,
+      "release_year": 2010,
+      "weight": 1890,
+      "engine_size": 8.0,
+      "price": 3300000
+    }
+  },
+  {
+    "id": "A4",
+    "name": "Bugatti Mistral",
+    "image": "A4.png",
+    "attributes": {
+      "top_speed": 453,
+      "acceleration": 2.5,
+      "horsepower": 1580,
+      "rpm": 7100,
+      "release_year": 2022,
+      "weight": 2040,
+      "engine_size": 8.0,
+      "price": 5000000
+    }
+  },
+  {
+    "id": "A5",
+    "name": "Bugatti Divo",
+    "image": "A5.png",
+    "attributes": {
+      "top_speed": 380,
+      "acceleration": 2.4,
+      "horsepower": 1500,
+      "rpm": 6700,
+      "release_year": 2018,
+      "weight": 1960,
+      "engine_size": 8.0,
+      "price": 5800000
+    }
+  },
+  {
+    "id": "A6",
+    "name": "Bugatti EB110 SS",
+    "image": "A6.png",
+    "attributes": {
+      "top_speed": 355,
+      "acceleration": 3.2,
+      "horsepower": 605,
+      "rpm": 8250,
+      "release_year": 1992,
+      "weight": 1430,
+      "engine_size": 3.5,
+      "price": 500000
+    }
+  },
+  {
+    "id": "A7",
+    "name": "Bugatti La Voiture Noire",
+    "image": "A7.png",
+    "attributes": {
+      "top_speed": 420,
+      "acceleration": 2.4,
+      "horsepower": 1500,
+      "rpm": 6700,
+      "release_year": 2019,
+      "weight": 2000,
+      "engine_size": 8.0,
+      "price": 18000000
+    }
+  },
+
+  {
+    "id": "B1",
+    "name": "Koenigsegg Jesko Absolut",
+    "image": "B1.png",
+    "attributes": {
+      "top_speed": 530,
+      "acceleration": 2.7,
+      "horsepower": 1600,
+      "rpm": 8500,
+      "release_year": 2020,
+      "weight": 1320,
+      "engine_size": 5.0,
+      "price": 3800000
+    }
+  },
+  {
+    "id": "B2",
+    "name": "Koenigsegg Agera RS",
+    "image": "B2.png",
+    "attributes": {
+      "top_speed": 457,
+      "acceleration": 2.8,
+      "horsepower": 1360,
+      "rpm": 7500,
+      "release_year": 2015,
+      "weight": 1395,
+      "engine_size": 5.0,
+      "price": 2500000
+    }
+  },
+  {
+    "id": "B3",
+    "name": "Koenigsegg Regera",
+    "image": "B3.png",
+    "attributes": {
+      "top_speed": 405,
+      "acceleration": 2.8,
+      "horsepower": 1500,
+      "rpm": 8250,
+      "release_year": 2015,
+      "weight": 1420,
+      "engine_size": 5.0,
+      "price": 2200000
+    }
+  },
+  {
+    "id": "B4",
+    "name": "Koenigsegg Gemera",
+    "image": "B4.png",
+    "attributes": {
+      "top_speed": 400,
+      "acceleration": 1.9,
+      "horsepower": 2300,
+      "rpm": 8500,
+      "release_year": 2023,
+      "weight": 2025,
+      "engine_size": 5.0,
+      "price": 1700000
+    }
+  },
+  {
+    "id": "B5",
+    "name": "Koenigsegg CCXR Trevita",
+    "image": "B5.png",
+    "attributes": {
+      "top_speed": 400,
+      "acceleration": 3.1,
+      "horsepower": 1020,
+      "rpm": 7500,
+      "release_year": 2009,
+      "weight": 1280,
+      "engine_size": 4.7,
+      "price": 4800000
+    }
+  },
+  {
+    "id": "B6",
+    "name": "Koenigsegg CC850",
+    "image": "B6.png",
+    "attributes": {
+      "top_speed": 450,
+      "acceleration": 2.8,
+      "horsepower": 1385,
+      "rpm": 8500,
+      "release_year": 2022,
+      "weight": 1385,
+      "engine_size": 5.0,
+      "price": 3100000
+    }
+  },
+  {
+    "id": "B7",
+    "name": "Koenigsegg CC Prototype",
+    "image": "B7.png",
+    "attributes": {
+      "top_speed": 390,
+      "acceleration": 3.2,
+      "horsepower": 655,
+      "rpm": 6500,
+      "release_year": 1996,
+      "weight": 930,
+      "engine_size": 4.6,
+      "price": null
+    }
+  },
+
+  {
+    "id": "C1",
+    "name": "Henessey Venom F5 EVO",
+    "image": "C1.png",
+    "attributes": {
+      "top_speed": 510,
+      "acceleration": 2.5,
+      "horsepower": 2030,
+      "rpm": 8200,
+      "release_year": 2025,
+      "weight": 1360,
+      "engine_size": 6.6,
+      "price": 3200000
+    }
+  },
+  {
+    "id": "C2",
+    "name": "Henessey Venom F5 REVO",
+    "image": "C2.png",
+    "attributes": {
+      "top_speed": 415,
+      "acceleration": 2.9,
+      "horsepower": 1820,
+      "rpm": 8500,
+      "release_year": 2023,
+      "weight": 1380,
+      "engine_size": 6.6,
+      "price": 3000000
+    }
+  },
+  {
+    "id": "C3",
+    "name": "Henessey Venom GT",
+    "image": "C3.png",
+    "attributes": {
+      "top_speed": 435,
+      "acceleration": 2.6,
+      "horsepower": 1230,
+      "rpm": 7200,
+      "release_year": 2010,
+      "weight": 1240,
+      "engine_size": 7.0,
+      "price": 1200000
+    }
+  },
+
+  {
+    "id": "D1",
+    "name": "SSC Tuatara Aggressor",
+    "image": "D1.png",
+    "attributes": {
+      "top_speed": 474,
+      "acceleration": 2.3,
+      "horsepower": 2200,
+      "rpm": 8200,
+      "release_year": 2021,
+      "weight": 1247,
+      "engine_size": 5.9,
+      "price": 6000000
+    }
+  },
+  {
+    "id": "D2",
+    "name": "SSC Ultimate Aero XT",
+    "image": "D2.png",
+    "attributes": {
+      "top_speed": 415,
+      "acceleration": 2.6,
+      "horsepower": 1300,
+      "rpm": 9100,
+      "release_year": 2013,
+      "weight": 1320,
+      "engine_size": 6.9,
+      "price": 750000
+    }
+  },
+
+  {
+    "id": "E1",
+    "name": "Pagani Huayra BC",
+    "image": "E1.png",
+    "attributes": {
+      "top_speed": 380,
+      "acceleration": 3.3,
+      "horsepower": 790,
+      "rpm": 6500,
+      "release_year": 2019,
+      "weight": 1220,
+      "engine_size": 6.0,
+      "price": 2500000
+    }
+  },
+  {
+    "id": "E2",
+    "name": "Pagani Utopia",
+    "image": "E2.png",
+    "attributes": {
+      "top_speed": 350,
+      "acceleration": 2.9,
+      "horsepower": 852,
+      "rpm": 6000,
+      "release_year": 2023,
+      "weight": 1280,
+      "engine_size": 6.0,
+      "price": 3400000
+    }
+  },
+  {
+    "id": "E3",
+    "name": "Pagani Zonda HP Barchetta",
+    "image": "E3.png",
+    "attributes": {
+      "top_speed": 355,
+      "acceleration": 3.1,
+      "horsepower": 789,
+      "rpm": 8000,
+      "release_year": 2017,
+      "weight": 1250,
+      "engine_size": 7.3,
+      "price": 17500000
+    }
+  },
+  {
+    "id": "E4",
+    "name": "Pagani Zonda C12",
+    "image": "E4.png",
+    "attributes": {
+      "top_speed": 298,
+      "acceleration": 4.2,
+      "horsepower": 395,
+      "rpm": 7000,
+      "release_year": 1999,
+      "weight": 1250,
+      "engine_size": 6.0,
+      "price": 325000
+    }
+  },
+
+  {
+    "id": "F1",
+    "name": "Ferrari F80",
+    "image": "F1.png",
+    "attributes": {
+      "top_speed": 350,
+      "acceleration": 2.2,
+      "horsepower": 1200,
+      "rpm": 9000,
+      "release_year": 2025,
+      "weight": 1525,
+      "engine_size": 3.0,
+      "price": 3700000
+    }
+  },
+  {
+    "id": "F2",
+    "name": "Ferrari La Ferrari (Aperta)",
+    "image": "F2.png",
+    "attributes": {
+      "top_speed": 370,
+      "acceleration": 2.7,
+      "horsepower": 950,
+      "rpm": 9250,
+      "release_year": 2013,
+      "weight": 1350,
+      "engine_size": 6.3,
+      "price": 2000000
+    }
+  },
+  {
+    "id": "F3",
+    "name": "Ferrari Enzo (F60)",
+    "image": "F3.png",
+    "attributes": {
+      "top_speed": 355,
+      "acceleration": 3.6,
+      "horsepower": 660,
+      "rpm": 8200,
+      "release_year": 2002,
+      "weight": 1255,
+      "engine_size": 6.0,
+      "price": 700000
+    }
+  },
+  {
+    "id": "F4",
+    "name": "Ferrari Daytona SP3",
+    "image": "F4.png",
+    "attributes": {
+      "top_speed": 340,
+      "acceleration": 2.8,
+      "horsepower": 830,
+      "rpm": 9500,
+      "release_year": 2021,
+      "weight": 1485,
+      "engine_size": 6.5,
+      "price": 2200000
+    }
+  },
+  {
+    "id": "F5",
+    "name": "Ferrari Monza SP1",
+    "image": "F5.png",
+    "attributes": {
+      "top_speed": 300,
+      "acceleration": 2.9,
+      "horsepower": 810,
+      "rpm": 9500,
+      "release_year": 2019,
+      "weight": 1500,
+      "engine_size": 6.5,
+      "price": 2000000
+    }
+  },
+
+  {
+    "id": "G1",
+    "name": "Mclaren W1",
+    "image": "G1.png",
+    "attributes": {
+      "top_speed": 350,
+      "acceleration": 2.7,
+      "horsepower": 1260,
+      "rpm": 9200,
+      "release_year": 2025,
+      "weight": 1400,
+      "engine_size": 4.0,
+      "price": 2100000
+    }
+  },
+  {
+    "id": "G2",
+    "name": "Mclaren P1",
+    "image": "G2.png",
+    "attributes": {
+      "top_speed": 360,
+      "acceleration": 2.8,
+      "horsepower": 905,
+      "rpm": 7500,
+      "release_year": 2013,
+      "weight": 1395,
+      "engine_size": 3.8,
+      "price": 1200000
+    }
+  },
+  {
+    "id": "G3",
+    "name": "Mclaren F1",
+    "image": "G3.png",
+    "attributes": {
+      "top_speed": 385,
+      "acceleration": 3.2,
+      "horsepower": 627,
+      "rpm": 7500,
+      "release_year": 1992,
+      "weight": 1140,
+      "engine_size": 6.1,
+      "price": 750000
+    }
+  },
+  {
+    "id": "G4",
+    "name": "Mclaren Senna",
+    "image": "G4.png",
+    "attributes": {
+      "top_speed": 335,
+      "acceleration": 2.8,
+      "horsepower": 790,
+      "rpm": 8000,
+      "release_year": 2017,
+      "weight": 1195,
+      "engine_size": 4.0,
+      "price": 1900000
+    }
+  },
+  {
+    "id": "G5",
+    "name": "Mclaren Speedtail",
+    "image": "G5.png",
+    "attributes": {
+      "top_speed": 403,
+      "acceleration": 2.9,
+      "horsepower": 1050,
+      "rpm": 6500,
+      "release_year": 2018,
+      "weight": 1430,
+      "engine_size": 4.0,
+      "price": 2300000
+    }
+  },
+  {
+    "id": "G6",
+    "name": "Mclaren Elva",
+    "image": "G6.png",
+    "attributes": {
+      "top_speed": 326,
+      "acceleration": 2.8,
+      "horsepower": 804,
+      "rpm": 8500,
+      "release_year": 2019,
+      "weight": 1150,
+      "engine_size": 4.0,
+      "price": 1700000
+    }
+  },
+  {
+    "id": "G7",
+    "name": "Mclaren Sabre",
+    "image": "G7.png",
+    "attributes": {
+      "top_speed": 350,
+      "acceleration": 2.8,
+      "horsepower": 825,
+      "rpm": 8500,
+      "release_year": 2020,
+      "weight": 1350,
+      "engine_size": 4.0,
+      "price": 3800000
+    }
+  }
+]
