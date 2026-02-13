@@ -303,16 +303,6 @@ def main():
         st.subheader("Create or join an online multiplayer room")
         with st.form("create_room"):
             num_players = st.selectbox("Number of players", [2, 3, 4], index=1)
-            max_players = min(8, len(load_cards()))
-            num_players = st.number_input(
-                "Number of players",
-                min_value=2,
-                max_value=max_players,
-                value=min(4, max_players),
-                step=1,
-                help="Host can choose how many players join this room.",
-            )
-            num_players = int(num_players)
             mobile_layout = st.toggle("Use compact mobile reveal layout", value=True)
             owner_name = st.text_input("Your name", value="Host")
             create_submitted = st.form_submit_button("Create room")
