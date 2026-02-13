@@ -1,11 +1,14 @@
+import base64
 import json
 import random
 import sqlite3
 import string
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 
 import streamlit as st
+from streamlit_extras.st_autorefresh import st_autorefresh
 
 # ----------------------------
 # Config
@@ -35,6 +38,8 @@ DISPLAY = {
 }
 
 DB_PATH = "game_state.db"
+ASSETS_DIR = Path("assets/images")
+DATA_CARDS_PATH = Path("data/cards.json")
 
 
 # ----------------------------
@@ -42,7 +47,7 @@ DB_PATH = "game_state.db"
 # ----------------------------
 @st.cache_data
 def load_cards():
-    with open("data/cards.json", "r", encoding="utf-8") as f:
+    with open(DATA_CARDS_PATH, "r", encoding="utf-8") as f:
         cards = json.load(f)
 
     for c in cards:
@@ -58,15 +63,34 @@ def load_cards():
     return cards
 
 
-def inject_mobile_styles():
+@st.cache_data(show_spinner=False)
+def _img_as_data_uri(rel_path: str | None) -> str | None:
+    """Return a data URI for assets/images/<rel_path>. None if missing."""
+    if not rel_path:
+        return None
+    p = ASSETS_DIR / rel_path
+    if not p.exists() or not p.is_file():
+        return None
+
+    ext = p.suffix.lower().lstrip(".")
+    if ext not in {"png", "jpg", "jpeg", "webp"}:
+        return None
+
+    mime = "image/jpeg" if ext in {"jpg", "jpeg"} else f"image/{ext}"
+    b64 = base64.b64encode(p.read_bytes()).decode("ascii")
+    return f"data:{mime};base64,{b64}"
+
+
+def inject_styles():
     st.markdown(
         """
         <style>
             .main .block-container {
-                max-width: 780px;
-                padding-top: 1.25rem;
-                padding-bottom: 5.5rem;
+                max-width: 980px;
+                padding-top: 1.0rem;
+                padding-bottom: 5.0rem;
             }
+
             .stButton > button {
                 width: 100%;
                 min-height: 3rem;
@@ -74,14 +98,16 @@ def inject_mobile_styles():
                 font-size: 1rem;
                 font-weight: 600;
             }
+
             .metric-chip {
                 background: #f2f4f8;
                 border-radius: 12px;
-                padding: 0.6rem 0.8rem;
+                padding: 0.55rem 0.7rem;
                 margin-bottom: 0.5rem;
                 text-align: center;
                 border: 1px solid #d6d9df;
             }
+
             .share-box {
                 background: #eff7ff;
                 border: 1px solid #b7d5ff;
@@ -90,13 +116,76 @@ def inject_mobile_styles():
                 margin-bottom: 0.8rem;
                 font-size: 0.95rem;
             }
+
+            /* --- Compact card row --- */
+            .tt-row {
+                display: flex;
+                gap: 12px;
+                overflow-x: auto;
+                padding: 8px 2px 12px 2px;
+                align-items: stretch;
+                scroll-snap-type: x mandatory;
+            }
+            .tt-row::-webkit-scrollbar { height: 10px; }
+            .tt-row::-webkit-scrollbar-thumb { background: #cfd6e4; border-radius: 10px; }
+
+            .tt-card {
+                width: 200px;               /* smaller than default */
+                min-width: 200px;
+                background: #ffffff;
+                border: 1px solid #d6d9df;
+                border-radius: 14px;
+                padding: 10px;
+                box-shadow: 0 1px 6px rgba(16, 24, 40, 0.06);
+                scroll-snap-align: start;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .tt-card.active {
+                border: 3px solid #ff2d2d;  /* red frame */
+            }
+
+            .tt-name {
+                font-weight: 800;
+                font-size: 0.98rem;
+                line-height: 1.2;
+                margin: 0;
+            }
+            .tt-player {
+                font-weight: 700;
+                font-size: 0.9rem;
+                opacity: 0.85;
+                margin: 0;
+            }
+            .tt-img {
+                width: 100%;
+                height: 118px;
+                object-fit: cover;
+                border-radius: 12px;
+                border: 1px solid #eef1f6;
+            }
+            .tt-attr {
+                font-size: 0.9rem;
+                line-height: 1.25;
+                background: #f7f8fb;
+                border: 1px solid #e6e9f2;
+                border-radius: 12px;
+                padding: 8px;
+            }
+            .tt-attr b { font-weight: 800; }
+
             @media (max-width: 768px) {
                 .main .block-container {
                     padding-left: 1rem;
                     padding-right: 1rem;
                 }
-                img {
-                    border-radius: 14px;
+                .tt-card {
+                    width: 175px;
+                    min-width: 175px;
+                }
+                .tt-img {
+                    height: 105px;
                 }
             }
         </style>
@@ -284,8 +373,39 @@ def get_my_player_index(state, client_id):
     return state.get("seat_claims", {}).get(client_id)
 
 
+def _card_html(player_name: str, card: dict, highlight: bool, attr_key: str | None, show_attr: bool) -> str:
+    cls = "tt-card active" if highlight else "tt-card"
+    img_uri = _img_as_data_uri(card.get("image"))
+    img_html = f"<img class='tt-img' src='{img_uri}' />" if img_uri else ""
+    attr_html = ""
+    if show_attr and attr_key:
+        val = card["attributes"].get(attr_key)
+        disp = DISPLAY.get(attr_key, attr_key)
+        vtxt = "N/A" if val is None else str(val)
+        attr_html = f"<div class='tt-attr'><b>{disp}:</b> {vtxt}</div>"
+
+    return f"""
+        <div class="{cls}">
+            <p class="tt-player">{player_name}</p>
+            <p class="tt-name">{card.get('name','(unknown)')}</p>
+            {img_html}
+            {attr_html}
+        </div>
+    """
+
+
+def render_round_cards_horizontal(state, card_by_player: dict[int, dict], chosen_attr: str | None, show_attr: bool):
+    """Show all participating players' cards in a single horizontal row."""
+    items = []
+    for pi, card in card_by_player.items():
+        pname = state["players"][int(pi)]["name"]
+        highlight = int(pi) == int(state["active"])
+        items.append(_card_html(pname, card, highlight, chosen_attr, show_attr))
+    st.markdown("<div class='tt-row'>" + "\n".join(items) + "</div>", unsafe_allow_html=True)
+
+
 def main():
-    inject_mobile_styles()
+    inject_styles()
     init_db()
 
     st.title("🏎️ Top Trumps – Hypercars")
@@ -299,8 +419,20 @@ def main():
     room_id = params.get("room")
     st.sidebar.subheader("Online room")
 
+    # ---------------------------------------------------------
+    # Lobby (no room yet)
+    # ---------------------------------------------------------
     if not room_id:
         st.subheader("Create or join an online multiplayer room")
+
+        # Pre-display a note that the app can generate a share link after creation
+        base_url = getattr(st.context, "url", "").strip()  # base URL without query params
+        if base_url:
+            st.markdown(
+                f"<div class='share-box'><strong>Tip (Host):</strong> After you create a room, you will get a full share link like:<br/><code>{base_url}?room=ABC123</code></div>",
+                unsafe_allow_html=True,
+            )
+
         with st.form("create_room"):
             num_players = st.selectbox("Number of players", [2, 3, 4], index=1)
             mobile_layout = st.toggle("Use compact mobile reveal layout", value=True)
@@ -326,7 +458,15 @@ def main():
                 st.rerun()
         st.stop()
 
+    # ---------------------------------------------------------
+    # In-room
+    # ---------------------------------------------------------
     room_id = str(room_id).upper()
+
+    # Auto-refresh so all players sync when someone acts
+    # (Fast enough to feel real-time, light enough for Streamlit)
+    st_autorefresh(interval=1500, key="room_poll")
+
     state = load_room_state(room_id)
     if state is None:
         st.error("This room no longer exists.")
@@ -336,14 +476,25 @@ def main():
             st.rerun()
         st.stop()
 
+    base_url = getattr(st.context, "url", "").strip()
+    share_url = f"{base_url}?room={room_id}" if base_url else f"?room={room_id}"
+
     st.markdown(
-        f"<div class='share-box'><strong>Room code:</strong> {room_id}<br/>Share this URL with friends to join this match.</div>",
+        f"""
+        <div class='share-box'>
+            <strong>Room code:</strong> {room_id}<br/>
+            <strong>Share link (send this):</strong><br/>
+            <code>{share_url}</code>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
     st.caption(f"Last sync (UTC): {state.get('updated_at', state.get('created_at', 'unknown'))}")
 
-    if st.button("🔄 Refresh room state"):
-        st.rerun()
+    # Optional manual refresh (keep it, but polling already happens)
+    with st.sidebar:
+        if st.button("🔄 Force refresh now"):
+            st.rerun()
 
     my_idx = get_my_player_index(state, client_id)
 
@@ -409,14 +560,22 @@ def main():
 
     st.subheader(f"Round {state['round']} — {active_player['name']}'s turn")
 
+    # ---------------------------------------------------------
+    # Choose phase
+    # ---------------------------------------------------------
     if state["phase"] == "choose":
-        top_card = active_player["deck"][0]
-        st.write(f"**Top card in play:** {top_card['name']}")
-        if top_card.get("image"):
-            st.image(f"assets/images/{top_card['image']}", use_container_width=True)
+        # Show ALL players' top cards for this round, horizontally, visible to everyone
+        # (Per your request, this reveals all round cards before the choice.)
+        round_cards = {}
+        for pi in alive:
+            if len(state["players"][pi]["deck"]) > 0:
+                round_cards[pi] = state["players"][pi]["deck"][0]
+
+        st.markdown("### Cards in this round")
+        render_round_cards_horizontal(state, round_cards, chosen_attr=None, show_attr=False)
 
         if is_my_turn:
-            st.markdown("**Choose an attribute:**")
+            st.markdown("### Choose an attribute")
             attr_keys = list(RULES.keys())
             chosen = st.radio(
                 "Attribute",
@@ -433,7 +592,7 @@ def main():
 
                 alive_now = alive_player_indexes(latest)
                 if latest["active"] != my_idx or latest["phase"] != "choose":
-                    st.warning("State changed, please refresh.")
+                    st.warning("State changed, please wait for auto-refresh or force refresh.")
                     st.stop()
 
                 played = {}
@@ -463,36 +622,18 @@ def main():
                 save_room_state(room_id, latest)
                 st.rerun()
         else:
-            st.info("Waiting for the active player to choose an attribute.")
+            st.info("Waiting for the active player to choose an attribute (auto-refresh is on).")
 
+    # ---------------------------------------------------------
+    # Reveal phase
+    # ---------------------------------------------------------
     elif state["phase"] == "reveal":
         chosen_attr = state["chosen_attr"]
         st.markdown(f"### Reveal — Attribute: **{DISPLAY.get(chosen_attr, chosen_attr)}**")
 
-        played_items = list(state["played"].items())
-        use_mobile_layout = state.get("mobile_layout", True)
-
-        if use_mobile_layout:
-            for pi, card in played_items:
-                pname = state["players"][int(pi)]["name"]
-                val = card["attributes"].get(chosen_attr)
-                with st.container(border=True):
-                    st.markdown(f"#### {pname}")
-                    st.write(f"**{card['name']}**")
-                    st.write(f"**{DISPLAY.get(chosen_attr, chosen_attr)}:** {val if val is not None else 'N/A'}")
-                    if card.get("image"):
-                        st.image(f"assets/images/{card['image']}", use_container_width=True)
-        else:
-            cols = st.columns(len(played_items))
-            for col, (pi, card) in zip(cols, played_items):
-                pname = state["players"][int(pi)]["name"]
-                val = card["attributes"].get(chosen_attr)
-                with col:
-                    st.markdown(f"#### {pname}")
-                    st.write(f"**{card['name']}**")
-                    st.write(f"**{DISPLAY.get(chosen_attr, chosen_attr)}:** {val if val is not None else 'N/A'}")
-                    if card.get("image"):
-                        st.image(f"assets/images/{card['image']}", use_container_width=True)
+        # Horizontal row, always (scrollable), with active player highlighted in red
+        played_items = {int(pi): card for pi, card in state["played"].items()}
+        render_round_cards_horizontal(state, played_items, chosen_attr=chosen_attr, show_attr=True)
 
         st.info(state.get("outcome_text", "Round complete."))
 
@@ -511,7 +652,7 @@ def main():
                 save_room_state(room_id, latest)
                 st.rerun()
         else:
-            st.info("Waiting for active player to continue.")
+            st.info("Waiting for active player to continue (auto-refresh is on).")
 
 
 if __name__ == "__main__":
