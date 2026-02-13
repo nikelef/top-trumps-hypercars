@@ -3,6 +3,7 @@ import json
 import random
 import sqlite3
 import string
+import textwrap
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -53,30 +54,24 @@ def load_cards():
 
     for c in cards:
         assert "id" in c and "name" in c and "attributes" in c
-
         for k in RULES.keys():
             if k not in c["attributes"]:
                 c["attributes"][k] = None
-
         if "image" not in c:
             c["image"] = None
-
     return cards
 
 
 @st.cache_data(show_spinner=False)
 def _img_as_data_uri(rel_path: str | None) -> str | None:
-    """Return a data URI for assets/images/<rel_path>. None if missing."""
     if not rel_path:
         return None
     p = ASSETS_DIR / rel_path
     if not p.exists() or not p.is_file():
         return None
-
     ext = p.suffix.lower().lstrip(".")
     if ext not in {"png", "jpg", "jpeg", "webp"}:
         return None
-
     mime = "image/jpeg" if ext in {"jpg", "jpeg"} else f"image/{ext}"
     b64 = base64.b64encode(p.read_bytes()).decode("ascii")
     return f"data:{mime};base64,{b64}"
@@ -87,109 +82,118 @@ def inject_styles():
         """
         <style>
             .main .block-container{
-                max-width: 1180px;
+                max-width: 1280px;
                 padding-top: 1.0rem;
                 padding-bottom: 5.0rem;
             }
 
             .stButton > button{
                 width: 100%;
-                min-height: 3rem;
+                min-height: 3.0rem;
                 border-radius: 0.9rem;
-                font-size: 1rem;
+                font-size: 1.0rem;
                 font-weight: 650;
             }
 
             .metric-chip{
                 background: #f2f4f8;
                 border-radius: 14px;
-                padding: 0.65rem 0.9rem;
+                padding: 0.70rem 0.95rem;
                 margin-bottom: 0.6rem;
                 text-align: center;
                 border: 1px solid #d6d9df;
-                font-size: 0.98rem;
+                font-size: 1.00rem;
             }
 
             .share-box{
                 background: #eff7ff;
                 border: 1px solid #b7d5ff;
                 border-radius: 12px;
-                padding: 0.85rem 0.9rem;
+                padding: 0.95rem 1.0rem;
                 margin-bottom: 0.9rem;
-                font-size: 1rem;
+                font-size: 1.02rem;
             }
 
             /* ------- Card row (horizontal, scrollable) ------- */
             .tt-row{
                 display: flex;
-                gap: 14px;
+                gap: 16px;
                 overflow-x: auto;
                 overflow-y: hidden;
-                padding: 10px 4px 14px 4px;
+                padding: 12px 4px 16px 4px;
                 align-items: stretch;
                 scroll-snap-type: x mandatory;
             }
             .tt-row::-webkit-scrollbar { height: 10px; }
             .tt-row::-webkit-scrollbar-thumb { background: #cfd6e4; border-radius: 10px; }
 
-            /* ------- Card ------- */
+            /* ------- BIGGER cards ------- */
             .tt-card{
-                width: 320px;                 /* ✅ bigger */
-                min-width: 320px;
+                width: 420px;                 /* ✅ bigger desktop */
+                min-width: 420px;
                 background: #ffffff;
                 border: 2px solid #d6d9df;
-                border-radius: 18px;
-                padding: 12px 12px 12px 12px;
-                box-shadow: 0 2px 10px rgba(16, 24, 40, 0.08);
+                border-radius: 20px;
+                padding: 14px;
+                box-shadow: 0 2px 12px rgba(16, 24, 40, 0.10);
                 scroll-snap-align: start;
                 display: flex;
                 flex-direction: column;
-                gap: 10px;
+                gap: 12px;
             }
             .tt-card.active{
-                border: 4px solid #ff2d2d;    /* ✅ strong red frame */
+                border: 5px solid #ff2d2d;    /* ✅ strong red frame */
             }
 
             .tt-player{
-                font-weight: 750;
-                font-size: 1.02rem;
+                font-weight: 800;
+                font-size: 1.10rem;
                 opacity: 0.85;
                 margin: 0;
             }
             .tt-name{
-                font-weight: 900;
-                font-size: 1.15rem;
+                font-weight: 950;
+                font-size: 1.28rem;
                 line-height: 1.18;
                 margin: 0;
             }
 
             .tt-img{
                 width: 100%;
-                height: 175px;                /* ✅ bigger image */
+                height: 215px;                /* ✅ bigger image */
                 object-fit: cover;
-                border-radius: 14px;
+                border-radius: 16px;
                 border: 1px solid #eef1f6;
+            }
+
+            .tt-chosen{
+                background: #fff2f2;
+                border: 1px solid #ffb3b3;
+                border-radius: 12px;
+                padding: 9px 12px;
+                font-weight: 950;
+                font-size: 1.05rem;
             }
 
             /* ------- Attribute panel ------- */
             .tt-attrs{
                 background: #f7f8fb;
                 border: 1px solid #e6e9f2;
-                border-radius: 14px;
-                padding: 10px;
+                border-radius: 16px;
+                padding: 12px;
                 display: grid;
                 grid-template-columns: 1fr auto;
-                row-gap: 8px;
-                column-gap: 10px;
-                font-size: 0.98rem;            /* ✅ readable */
+                row-gap: 9px;
+                column-gap: 12px;
+                font-size: 1.06rem;           /* ✅ bigger / readable */
                 line-height: 1.2;
             }
             .tt-attrs .k{
-                font-weight: 750;
-                opacity: 0.92;
+                font-weight: 850;
+                opacity: 0.94;
             }
             .tt-attrs .v{
-                font-weight: 850;
+                font-weight: 950;
                 text-align: right;
                 white-space: nowrap;
             }
@@ -200,29 +204,23 @@ def inject_styles():
                 margin: 2px 0;
             }
 
-            .tt-chosen{
-                background: #fff2f2;
-                border: 1px solid #ffb3b3;
-                border-radius: 12px;
-                padding: 8px 10px;
-                font-weight: 900;
-                font-size: 1rem;
-            }
-
             @media (max-width: 768px){
                 .main .block-container{
                     padding-left: 1rem;
                     padding-right: 1rem;
                 }
                 .tt-card{
-                    width: 285px;
-                    min-width: 285px;
+                    width: 340px;             /* ✅ bigger mobile */
+                    min-width: 340px;
                 }
                 .tt-img{
-                    height: 155px;
+                    height: 190px;
                 }
                 .tt-name{
-                    font-size: 1.08rem;
+                    font-size: 1.18rem;
+                }
+                .tt-attrs{
+                    font-size: 1.02rem;
                 }
             }
         </style>
@@ -291,10 +289,7 @@ def alive_player_indexes(state):
 
 def compare_cards(card_by_player, attribute):
     rule = RULES[attribute]
-    values = []
-    for pi, card in card_by_player.items():
-        v = card["attributes"].get(attribute, None)
-        values.append((pi, v))
+    values = [(pi, card["attributes"].get(attribute, None)) for pi, card in card_by_player.items()]
 
     if all(v is None for _, v in values):
         return None
@@ -314,9 +309,7 @@ def compare_cards(card_by_player, attribute):
         best = min(score for _, score in scored)
         winners = [pi for pi, score in scored if score == best]
 
-    if len(winners) == 1:
-        return winners[0]
-    return None
+    return winners[0] if len(winners) == 1 else None
 
 
 def start_new_game(num_players, mobile_layout, owner_client_id):
@@ -336,7 +329,7 @@ def start_new_game(num_players, mobile_layout, owner_client_id):
         "winner": None,
         "round": 1,
         "pot": [],
-        "mobile_layout": mobile_layout,  # kept for compatibility
+        "mobile_layout": mobile_layout,
         "outcome_text": "",
         "seat_claims": {owner_client_id: 0},
         "created_at": now_iso(),
@@ -410,11 +403,6 @@ def get_my_player_index(state, client_id):
 
 
 def _attrs_html(card: dict, chosen_attr: str | None, show_all: bool) -> str:
-    """
-    Render either:
-      - all attributes (reveal)
-      - or only the chosen attribute (optional)
-    """
     attrs = card.get("attributes", {})
     rows = []
 
@@ -434,31 +422,27 @@ def _attrs_html(card: dict, chosen_attr: str | None, show_all: bool) -> str:
     if chosen_attr and show_all:
         chosen_badge = f"<div class='tt-chosen'>Chosen: {DISPLAY.get(chosen_attr, chosen_attr)}</div>"
 
-    return f"""
-        {chosen_badge}
-        <div class="tt-attrs">
-            {''.join(rows)}
-        </div>
-    """
+    return f"{chosen_badge}<div class='tt-attrs'>{''.join(rows)}</div>"
 
 
 def _card_html(player_name: str, card: dict, highlight: bool, chosen_attr: str | None, show_attrs: bool) -> str:
     cls = "tt-card active" if highlight else "tt-card"
     img_uri = _img_as_data_uri(card.get("image"))
     img_html = f"<img class='tt-img' src='{img_uri}' />" if img_uri else ""
+    attrs_html = _attrs_html(card, chosen_attr=chosen_attr, show_all=True) if show_attrs else ""
 
-    attrs_html = _attrs_html(card, chosen_attr=chosen_attr, show_all=show_attrs) if show_attrs else ""
-
-    return f"""
-        <div class="{cls}">
-            <div>
-                <p class="tt-player">{player_name}</p>
-                <p class="tt-name">{card.get('name','(unknown)')}</p>
-            </div>
-            {img_html}
-            {attrs_html}
-        </div>
+    # ✅ IMPORTANT: dedent + strip => NO leading spaces => not treated as code block
+    html = f"""
+    <div class="{cls}">
+      <div>
+        <p class="tt-player">{player_name}</p>
+        <p class="tt-name">{card.get('name','(unknown)')}</p>
+      </div>
+      {img_html}
+      {attrs_html}
+    </div>
     """
+    return textwrap.dedent(html).strip()
 
 
 def render_cards_row(state, card_by_player: dict[int, dict], chosen_attr: str | None, show_attrs: bool):
@@ -467,7 +451,9 @@ def render_cards_row(state, card_by_player: dict[int, dict], chosen_attr: str | 
         pname = state["players"][int(pi)]["name"]
         highlight = int(pi) == int(state["active"])
         items.append(_card_html(pname, card, highlight, chosen_attr, show_attrs))
-    st.markdown("<div class='tt-row'>" + "\n".join(items) + "</div>", unsafe_allow_html=True)
+
+    row_html = "<div class='tt-row'>" + "".join(items) + "</div>"
+    st.markdown(row_html, unsafe_allow_html=True)
 
 
 def main():
@@ -485,7 +471,6 @@ def main():
     room_id = params.get("room")
     st.sidebar.subheader("Online room")
 
-    # Lobby
     if not room_id:
         st.subheader("Create or join an online multiplayer room")
 
@@ -521,19 +506,14 @@ def main():
                 st.rerun()
         st.stop()
 
-    # In room
     room_id = str(room_id).upper()
 
-    # Auto refresh
+    # Auto-refresh for all players
     st_autorefresh(interval=1500, key="room_poll")
 
     state = load_room_state(room_id)
     if state is None:
         st.error("This room no longer exists.")
-        if st.button("Back to lobby"):
-            params.clear()
-            params["client"] = client_id
-            st.rerun()
         st.stop()
 
     base_url = getattr(st.context, "url", "").strip()
@@ -550,10 +530,6 @@ def main():
         unsafe_allow_html=True,
     )
     st.caption(f"Last sync (UTC): {state.get('updated_at', state.get('created_at', 'unknown'))}")
-
-    with st.sidebar:
-        if st.button("🔄 Force refresh now"):
-            st.rerun()
 
     my_idx = get_my_player_index(state, client_id)
 
@@ -572,33 +548,12 @@ def main():
                 latest = load_room_state(room_id)
                 if latest and claim_player_slot(latest, client_id, chosen_slot, name):
                     save_room_state(room_id, latest)
-                    st.success("Seat claimed.")
                     st.rerun()
                 else:
                     st.warning("That seat was just taken. Please pick another.")
         else:
             st.warning("All seats are currently taken. You are in spectator mode.")
-    else:
-        st.success(f"You are {state['players'][my_idx]['name']}.")
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("Leave my seat"):
-                latest = load_room_state(room_id)
-                if latest and release_player_slot(latest, client_id):
-                    save_room_state(room_id, latest)
-                    st.info("You left your seat.")
-                    st.rerun()
-        with c2:
-            is_owner = state.get("owner_client_id") == client_id
-            if st.button("Reset match", disabled=not is_owner):
-                latest = load_room_state(room_id)
-                if latest and latest.get("owner_client_id") == client_id:
-                    reset_match(latest)
-                    save_room_state(room_id, latest)
-                    st.success("Match reset. Same room and seats kept.")
-                    st.rerun()
-            if not is_owner:
-                st.caption("Only the room creator can reset.")
+        st.stop()
 
     with st.expander("Game stats", expanded=True):
         render_scoreboard(state)
@@ -619,22 +574,16 @@ def main():
 
     st.subheader(f"Round {state['round']} — {active_player['name']}'s turn")
 
-    # Choose phase (do NOT reveal attributes)
     if state["phase"] == "choose":
-        round_cards = {}
-        for pi in alive:
-            if len(state["players"][pi]["deck"]) > 0:
-                round_cards[pi] = state["players"][pi]["deck"][0]
-
+        round_cards = {pi: state["players"][pi]["deck"][0] for pi in alive if state["players"][pi]["deck"]}
         st.markdown("### Cards in this round")
         render_cards_row(state, round_cards, chosen_attr=None, show_attrs=False)
 
         if is_my_turn:
             st.markdown("### Choose an attribute")
-            attr_keys = list(RULES.keys())
             chosen = st.radio(
                 "Attribute",
-                options=attr_keys,
+                options=list(RULES.keys()),
                 format_func=lambda k: DISPLAY.get(k, k),
                 index=0,
             )
@@ -647,12 +596,10 @@ def main():
 
                 alive_now = alive_player_indexes(latest)
                 if latest["active"] != my_idx or latest["phase"] != "choose":
-                    st.warning("State changed, please wait for auto-refresh or force refresh.")
+                    st.warning("State changed, please wait for auto-refresh.")
                     st.stop()
 
-                played = {}
-                for pi in alive_now:
-                    played[pi] = latest["players"][pi]["deck"].pop(0)
+                played = {pi: latest["players"][pi]["deck"].pop(0) for pi in alive_now}
 
                 winner = compare_cards(played, chosen)
                 if winner is None:
@@ -679,7 +626,6 @@ def main():
         else:
             st.info("Waiting for the active player to choose an attribute (auto-refresh is on).")
 
-    # Reveal phase (show all attributes clearly, in-card)
     elif state["phase"] == "reveal":
         chosen_attr = state["chosen_attr"]
         st.markdown(f"### Reveal — Attribute: **{DISPLAY.get(chosen_attr, chosen_attr)}**")
@@ -689,21 +635,20 @@ def main():
 
         st.info(state.get("outcome_text", "Round complete."))
 
-        if is_my_turn:
-            if st.button("Next round"):
-                latest = load_room_state(room_id)
-                if latest is None:
-                    st.error("Room unavailable.")
-                    st.stop()
-                latest["played"] = {}
-                latest["chosen_attr"] = None
-                latest["winner"] = None
-                latest["outcome_text"] = ""
-                latest["phase"] = "choose"
-                latest["round"] += 1
-                save_room_state(room_id, latest)
-                st.rerun()
-        else:
+        if is_my_turn and st.button("Next round"):
+            latest = load_room_state(room_id)
+            if latest is None:
+                st.error("Room unavailable.")
+                st.stop()
+            latest["played"] = {}
+            latest["chosen_attr"] = None
+            latest["winner"] = None
+            latest["outcome_text"] = ""
+            latest["phase"] = "choose"
+            latest["round"] += 1
+            save_room_state(room_id, latest)
+            st.rerun()
+        elif not is_my_turn:
             st.info("Waiting for active player to continue (auto-refresh is on).")
 
 
