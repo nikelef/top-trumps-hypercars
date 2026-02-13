@@ -8,7 +8,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import streamlit as st
-from streamlit_extras.st_autorefresh import st_autorefresh
+from streamlit_autorefresh import st_autorefresh  # ✅ FIXED (use streamlit-autorefresh)
+
 
 # ----------------------------
 # Config
@@ -130,7 +131,7 @@ def inject_styles():
             .tt-row::-webkit-scrollbar-thumb { background: #cfd6e4; border-radius: 10px; }
 
             .tt-card {
-                width: 200px;               /* smaller than default */
+                width: 200px;
                 min-width: 200px;
                 background: #ffffff;
                 border: 1px solid #d6d9df;
@@ -309,7 +310,6 @@ def start_new_game(num_players, mobile_layout, owner_client_id):
 
 
 def reset_match(state):
-    """Restart cards/round flow while keeping room settings and claimed seats."""
     num_players = len(state["players"])
     cards = load_cards()
     random.shuffle(cards)
@@ -395,7 +395,6 @@ def _card_html(player_name: str, card: dict, highlight: bool, attr_key: str | No
 
 
 def render_round_cards_horizontal(state, card_by_player: dict[int, dict], chosen_attr: str | None, show_attr: bool):
-    """Show all participating players' cards in a single horizontal row."""
     items = []
     for pi, card in card_by_player.items():
         pname = state["players"][int(pi)]["name"]
@@ -419,14 +418,10 @@ def main():
     room_id = params.get("room")
     st.sidebar.subheader("Online room")
 
-    # ---------------------------------------------------------
-    # Lobby (no room yet)
-    # ---------------------------------------------------------
     if not room_id:
         st.subheader("Create or join an online multiplayer room")
 
-        # Pre-display a note that the app can generate a share link after creation
-        base_url = getattr(st.context, "url", "").strip()  # base URL without query params
+        base_url = getattr(st.context, "url", "").strip()
         if base_url:
             st.markdown(
                 f"<div class='share-box'><strong>Tip (Host):</strong> After you create a room, you will get a full share link like:<br/><code>{base_url}?room=ABC123</code></div>",
@@ -458,13 +453,9 @@ def main():
                 st.rerun()
         st.stop()
 
-    # ---------------------------------------------------------
-    # In-room
-    # ---------------------------------------------------------
     room_id = str(room_id).upper()
 
-    # Auto-refresh so all players sync when someone acts
-    # (Fast enough to feel real-time, light enough for Streamlit)
+    # ✅ Auto-refresh for all players
     st_autorefresh(interval=1500, key="room_poll")
 
     state = load_room_state(room_id)
@@ -491,7 +482,6 @@ def main():
     )
     st.caption(f"Last sync (UTC): {state.get('updated_at', state.get('created_at', 'unknown'))}")
 
-    # Optional manual refresh (keep it, but polling already happens)
     with st.sidebar:
         if st.button("🔄 Force refresh now"):
             st.rerun()
@@ -560,12 +550,7 @@ def main():
 
     st.subheader(f"Round {state['round']} — {active_player['name']}'s turn")
 
-    # ---------------------------------------------------------
-    # Choose phase
-    # ---------------------------------------------------------
     if state["phase"] == "choose":
-        # Show ALL players' top cards for this round, horizontally, visible to everyone
-        # (Per your request, this reveals all round cards before the choice.)
         round_cards = {}
         for pi in alive:
             if len(state["players"][pi]["deck"]) > 0:
@@ -624,14 +609,10 @@ def main():
         else:
             st.info("Waiting for the active player to choose an attribute (auto-refresh is on).")
 
-    # ---------------------------------------------------------
-    # Reveal phase
-    # ---------------------------------------------------------
     elif state["phase"] == "reveal":
         chosen_attr = state["chosen_attr"]
         st.markdown(f"### Reveal — Attribute: **{DISPLAY.get(chosen_attr, chosen_attr)}**")
 
-        # Horizontal row, always (scrollable), with active player highlighted in red
         played_items = {int(pi): card for pi, card in state["played"].items()}
         render_round_cards_horizontal(state, played_items, chosen_attr=chosen_attr, show_attr=True)
 
