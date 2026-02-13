@@ -87,18 +87,37 @@ def inject_styles():
                 padding-bottom: 3.0rem;
             }
 
-            /* Left stats panel stays visible */
             .tt-stats{
                 position: sticky;
                 top: 0.6rem;
             }
 
-            .stButton > button{
-                width: 100%;
-                min-height: 3.0rem;
-                border-radius: 0.9rem;
-                font-size: 1.0rem;
-                font-weight: 650;
+            /* BIG player counter styling */
+            .tt-player-row{
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                padding:12px 14px;
+                margin-bottom:10px;
+                border-radius:14px;
+                background:#f5f7fb;
+                border:1px solid #dfe3ef;
+            }
+
+            .tt-player-name{
+                font-weight:800;
+                font-size:1.05rem;
+            }
+
+            .tt-player-cards{
+                font-weight:950;
+                font-size:1.85rem;      /* 🔥 BIG NUMBER */
+                color:#0b57d0;
+            }
+
+            .tt-player-row.active{
+                background:#fff4f4;
+                border:2px solid #ff2d2d;
             }
 
             .metric-chip{
@@ -110,110 +129,11 @@ def inject_styles():
                 border: 1px solid #d6d9df;
                 font-size: 1.00rem;
             }
-
-            .share-box{
-                background: #eff7ff;
-                border: 1px solid #b7d5ff;
-                border-radius: 12px;
-                padding: 0.95rem 1.0rem;
-                margin-bottom: 0.9rem;
-                font-size: 1.02rem;
-            }
-
-            /* Row: no horizontal scroll; wrap when needed */
-            .tt-row{
-                display: flex;
-                gap: 18px;
-                overflow-x: hidden;
-                overflow-y: visible;
-                padding: 10px 6px 16px 6px;
-                align-items: stretch;
-                flex-wrap: nowrap;
-            }
-
-            /* Cards */
-            .tt-card{
-                flex: 1 1 0;
-                max-width: 1100px;
-                background: #ffffff;
-                border: 2px solid #d6d9df;
-                border-radius: 22px;
-                padding: 18px;
-                box-shadow: 0 3px 14px rgba(16, 24, 40, 0.10);
-                display: flex;
-                flex-direction: column;
-                gap: 14px;
-                position: relative;
-                min-width: 380px;
-            }
-            .tt-card.active{
-                border: 6px solid #ff2d2d;
-            }
-
-            /* Hidden cards */
-            .tt-card.hidden{
-                opacity: 0.35;
-                filter: blur(1.3px) grayscale(0.5);
-            }
-            .tt-card.hidden::after{
-                content: "HIDDEN";
-                position: absolute;
-                inset: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 2.4rem;
-                font-weight: 950;
-                letter-spacing: 0.14em;
-                color: rgba(20, 20, 20, 0.55);
-                background: rgba(250, 250, 250, 0.35);
-                border-radius: 22px;
-            }
-
-            .tt-player{
-                font-weight: 900;
-                font-size: 1.25rem;
-                opacity: 0.85;
-                margin: 0;
-            }
-            .tt-name{
-                font-weight: 950;
-                font-size: 1.55rem;
-                line-height: 1.15;
-                margin: 0;
-            }
-
-            /* Big photo */
-            .tt-img{
-                width: 100%;
-                height: 640px;
-                object-fit: cover;
-                border-radius: 18px;
-                border: 1px solid #eef1f6;
-            }
-
-            @media (max-width: 1400px){
-                .tt-img{ height: 520px; }
-            }
-
-            @media (max-width: 1200px){
-                /* on smaller screens, allow wrap and remove sticky */
-                .tt-row{ flex-wrap: wrap; }
-                .tt-stats{ position: static; }
-                .tt-card{ min-width: 320px; }
-                .tt-img{ height: 440px; }
-            }
-
-            @media (max-width: 768px){
-                .tt-row{ flex-wrap: wrap; }
-                .tt-card{ min-width: 300px; }
-                .tt-img{ height: 360px; }
-                .tt-name{ font-size: 1.35rem; }
-            }
         </style>
         """,
         unsafe_allow_html=True,
     )
+
 
 
 def now_iso():
@@ -349,19 +269,32 @@ def reset_match(state):
 
 def render_scoreboard_panel(state):
     total_cards = sum(len(p["deck"]) for p in state["players"]) + len(state.get("pot", []))
+
     st.markdown("### Scoreboard")
+
     st.markdown(
         f"""
-        <div class="metric-chip"><strong>Total cards:</strong> {total_cards}</div>
-        <div class="metric-chip"><strong>Round:</strong> {state['round']}<br/>
-        <strong>Phase:</strong> {state['phase'].title()}</div>
+        <div class="metric-chip">
+            <strong>Total cards:</strong> {total_cards}<br>
+            <strong>Round:</strong> {state['round']} &nbsp; | &nbsp;
+            <strong>Phase:</strong> {state['phase'].title()}
+        </div>
         """,
         unsafe_allow_html=True,
     )
 
     for i, p in enumerate(state["players"]):
-        tag = " 👈 Active" if i == state["active"] else ""
-        st.markdown(f"- **{p['name']}**: **{len(p['deck'])}** cards{tag}")
+        active_class = "tt-player-row active" if i == state["active"] else "tt-player-row"
+
+        st.markdown(
+            f"""
+            <div class="{active_class}">
+                <div class="tt-player-name">{p['name']}</div>
+                <div class="tt-player-cards">{len(p['deck'])}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     if len(state.get("pot", [])) > 0:
         st.caption(f"Tie pot: {len(state['pot'])} cards")
