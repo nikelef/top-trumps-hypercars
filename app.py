@@ -15,7 +15,7 @@ from streamlit_autorefresh import st_autorefresh
 # ----------------------------
 # Config
 # ----------------------------
-st.set_page_config(page_title="Top Trumps – Hypercars", layout="wide")  # ✅ use more screen
+st.set_page_config(page_title="Top Trumps – Hypercars", layout="wide")
 
 RULES = {
     "top_speed": "higher",
@@ -25,7 +25,7 @@ RULES = {
     "engine_size": "higher",
     "price": "higher",
     "rpm": "higher",
-    "release_year": "lower",  # older year wins
+    "release_year": "lower",
 }
 
 DISPLAY = {
@@ -82,9 +82,9 @@ def inject_styles():
         """
         <style>
             .main .block-container{
-                max-width: 1900px;      /* ✅ larger part of screen */
-                padding-top: 0.9rem;
-                padding-bottom: 4.0rem;
+                max-width: 2000px;
+                padding-top: 0.8rem;
+                padding-bottom: 3.6rem;
             }
 
             .stButton > button{
@@ -114,20 +114,21 @@ def inject_styles():
                 font-size: 1.02rem;
             }
 
-            /* -------- Row: NO SCROLL, cards auto-fit across width -------- */
+            /* Row: no horizontal scroll; wrap when needed */
             .tt-row{
                 display: flex;
                 gap: 18px;
-                overflow-x: hidden;        /* ✅ no horizontal scroll */
+                overflow-x: hidden;
                 overflow-y: visible;
                 padding: 10px 6px 16px 6px;
                 align-items: stretch;
+                flex-wrap: nowrap;
             }
 
-            /* -------- Cards: ~2× bigger, but can shrink to fit row -------- */
+            /* Cards */
             .tt-card{
-                flex: 1 1 0;               /* ✅ share row space */
-                max-width: 900px;          /* hard upper bound */
+                flex: 1 1 0;
+                max-width: 1000px;
                 background: #ffffff;
                 border: 2px solid #d6d9df;
                 border-radius: 22px;
@@ -137,17 +138,16 @@ def inject_styles():
                 flex-direction: column;
                 gap: 14px;
                 position: relative;
-                min-width: 360px;          /* ensures still readable */
+                min-width: 380px;
             }
-
             .tt-card.active{
-                border: 6px solid #ff2d2d; /* ✅ thick red frame */
+                border: 6px solid #ff2d2d;
             }
 
-            /* Shaded/hidden cards */
+            /* Hidden cards */
             .tt-card.hidden{
-                opacity: 0.38;
-                filter: blur(1.2px) grayscale(0.4);
+                opacity: 0.35;
+                filter: blur(1.3px) grayscale(0.5);
             }
             .tt-card.hidden::after{
                 content: "HIDDEN";
@@ -156,7 +156,7 @@ def inject_styles():
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 2.2rem;
+                font-size: 2.4rem;
                 font-weight: 950;
                 letter-spacing: 0.14em;
                 color: rgba(20, 20, 20, 0.55);
@@ -166,75 +166,42 @@ def inject_styles():
 
             .tt-player{
                 font-weight: 900;
-                font-size: 1.25rem;  /* bigger */
+                font-size: 1.25rem;
                 opacity: 0.85;
                 margin: 0;
             }
             .tt-name{
                 font-weight: 950;
-                font-size: 1.55rem;  /* bigger */
+                font-size: 1.55rem;
                 line-height: 1.15;
                 margin: 0;
             }
 
+            /* ✅ PHOTO DOUBLED: very large image area */
             .tt-img{
                 width: 100%;
-                height: 320px;       /* bigger */
+                height: 640px;     /* was ~320; doubled */
                 object-fit: cover;
                 border-radius: 18px;
                 border: 1px solid #eef1f6;
             }
 
-            .tt-chosen{
-                background: #fff2f2;
-                border: 1px solid #ffb3b3;
-                border-radius: 14px;
-                padding: 10px 14px;
-                font-weight: 950;
-                font-size: 1.15rem;
-            }
-
-            .tt-attrs{
-                background: #f7f8fb;
-                border: 1px solid #e6e9f2;
-                border-radius: 18px;
-                padding: 14px;
-                display: grid;
-                grid-template-columns: 1fr auto;
-                row-gap: 10px;
-                column-gap: 14px;
-                font-size: 1.18rem; /* bigger */
-                line-height: 1.2;
-            }
-            .tt-attrs .k{
-                font-weight: 900;
-                opacity: 0.95;
-            }
-            .tt-attrs .v{
-                font-weight: 950;
-                text-align: right;
-                white-space: nowrap;
-            }
-            .tt-attrs .sep{
-                grid-column: 1 / span 2;
-                height: 1px;
-                background: #e4e8f1;
-                margin: 2px 0;
+            @media (max-width: 1400px){
+                .tt-img{ height: 520px; }
             }
 
             @media (max-width: 1100px){
-                /* on smaller screens, still no scroll: allow wrap */
-                .tt-row{ flex-wrap: wrap; overflow-x: visible; }
+                /* wrap on smaller screens */
+                .tt-row{ flex-wrap: wrap; }
                 .tt-card{ min-width: 320px; }
-                .tt-img{ height: 260px; }
+                .tt-img{ height: 440px; }
             }
 
             @media (max-width: 768px){
                 .tt-row{ flex-wrap: wrap; }
                 .tt-card{ min-width: 300px; }
-                .tt-img{ height: 230px; }
+                .tt-img{ height: 360px; }
                 .tt-name{ font-size: 1.35rem; }
-                .tt-attrs{ font-size: 1.08rem; }
             }
         </style>
         """,
@@ -351,28 +318,6 @@ def start_new_game(num_players, mobile_layout, owner_client_id):
     }
 
 
-def reset_match(state):
-    num_players = len(state["players"])
-    cards = load_cards()
-    random.shuffle(cards)
-
-    names = [p["name"] for p in state["players"]]
-    players = [{"name": names[i], "deck": []} for i in range(num_players)]
-    for idx, card in enumerate(cards):
-        players[idx % num_players]["deck"].append(card)
-
-    state["players"] = players
-    state["active"] = 0
-    state["phase"] = "choose"
-    state["chosen_attr"] = None
-    state["played"] = {}
-    state["winner"] = None
-    state["round"] = 1
-    state["pot"] = []
-    state["outcome_text"] = ""
-    return state
-
-
 def render_scoreboard(state):
     total_cards = sum(len(p["deck"]) for p in state["players"]) + len(state.get("pot", []))
     st.markdown("### Scoreboard")
@@ -383,11 +328,9 @@ def render_scoreboard(state):
         """,
         unsafe_allow_html=True,
     )
-
     for i, p in enumerate(state["players"]):
         tag = " 👈 Active" if i == state["active"] else ""
         st.markdown(f"- **{p['name']}**: **{len(p['deck'])}** cards{tag}")
-
     if len(state.get("pot", [])) > 0:
         st.caption(f"Tie pot: {len(state['pot'])} cards")
 
@@ -402,65 +345,24 @@ def claim_player_slot(state, client_id, player_idx, display_name):
     return True
 
 
-def release_player_slot(state, client_id):
-    claims = state.get("seat_claims", {})
-    if client_id in claims:
-        del claims[client_id]
-        state["seat_claims"] = claims
-        return True
-    return False
-
-
 def get_my_player_index(state, client_id):
     return state.get("seat_claims", {}).get(client_id)
 
 
-def _attrs_html(card: dict, chosen_attr: str | None, show_all: bool) -> str:
-    attrs = card.get("attributes", {})
-    keys = list(RULES.keys()) if show_all else ([chosen_attr] if chosen_attr else [])
-    if not keys:
-        return ""
-
-    rows = []
-    for idx, k in enumerate(keys):
-        disp = DISPLAY.get(k, k)
-        v = attrs.get(k, None)
-        vtxt = "N/A" if v is None else str(v)
-        rows.append(f"<div class='k'>{disp}</div><div class='v'>{vtxt}</div>")
-        if idx != len(keys) - 1:
-            rows.append("<div class='sep'></div>")
-
-    chosen_badge = ""
-    if chosen_attr and show_all:
-        chosen_badge = f"<div class='tt-chosen'>Chosen: {DISPLAY.get(chosen_attr, chosen_attr)}</div>"
-
-    return f"{chosen_badge}<div class='tt-attrs'>{''.join(rows)}</div>"
-
-
-def _card_html(
-    player_name: str,
-    card: dict,
-    highlight: bool,
-    hidden: bool,
-    chosen_attr: str | None,
-    show_attrs: bool,
-) -> str:
+def _card_html(player_name: str, card: dict, highlight: bool, hidden: bool) -> str:
     cls = "tt-card"
     if highlight:
         cls += " active"
     if hidden:
         cls += " hidden"
 
-    # If hidden, do not show the car name, image, or attributes.
     if hidden:
         name_html = "<p class='tt-name'>—</p>"
         img_html = ""
-        attrs_html = ""
     else:
         name_html = f"<p class='tt-name'>{card.get('name','(unknown)')}</p>"
         img_uri = _img_as_data_uri(card.get("image"))
         img_html = f"<img class='tt-img' src='{img_uri}' />" if img_uri else ""
-        attrs_html = _attrs_html(card, chosen_attr=chosen_attr, show_all=True) if show_attrs else ""
 
     html = f"""
     <div class="{cls}">
@@ -469,41 +371,26 @@ def _card_html(
         {name_html}
       </div>
       {img_html}
-      {attrs_html}
     </div>
     """
     return textwrap.dedent(html).strip()
 
 
-def render_cards_row(
-    state,
-    card_by_player: dict[int, dict],
-    viewer_idx: int | None,
-    chosen_attr: str | None,
-    reveal: bool,
-):
-    """
-    Hidden-info rules:
-      - In CHOOSE phase (reveal=False): viewer sees ONLY their own card; everyone else shaded/hidden.
-      - In REVEAL phase (reveal=True): everyone sees everything.
-    """
+def render_cards_row(state, cards_by_player: dict[int, dict], viewer_idx: int | None, reveal: bool):
     items = []
-    for pi, card in card_by_player.items():
+    for pi, card in cards_by_player.items():
         pname = state["players"][int(pi)]["name"]
         highlight = int(pi) == int(state["active"])
 
         if reveal:
             hidden = False
-            show_attrs = True
         else:
-            # choose phase: show only viewer's own card (if seated)
+            # choose phase: only see own card; others hidden/shaded
             hidden = not (viewer_idx is not None and int(pi) == int(viewer_idx))
-            show_attrs = not hidden  # only for own card
 
-        items.append(_card_html(pname, card, highlight, hidden, chosen_attr, show_attrs))
+        items.append(_card_html(pname, card, highlight, hidden))
 
-    row_html = "<div class='tt-row'>" + "".join(items) + "</div>"
-    st.markdown(row_html, unsafe_allow_html=True)
+    st.markdown("<div class='tt-row'>" + "".join(items) + "</div>", unsafe_allow_html=True)
 
 
 def main():
@@ -559,8 +446,6 @@ def main():
 
     # In room
     room_id = str(room_id).upper()
-
-    # Auto-refresh for all players
     st_autorefresh(interval=1500, key="room_poll")
 
     state = load_room_state(room_id)
@@ -585,7 +470,7 @@ def main():
 
     my_idx = get_my_player_index(state, client_id)
 
-    # Seat selection (must be seated to see your card in choose phase)
+    # Must claim seat to see any pre-reveal content
     if my_idx is None:
         taken = set(state.get("seat_claims", {}).values())
         available = [i for i in range(len(state["players"])) if i not in taken]
@@ -627,13 +512,11 @@ def main():
 
     st.subheader(f"Round {state['round']} — {active_player['name']}'s turn")
 
-    # CHOOSE phase (hidden info)
     if state["phase"] == "choose":
         round_cards = {pi: state["players"][pi]["deck"][0] for pi in alive if state["players"][pi]["deck"]}
 
         st.markdown("### Cards in this round")
-        # reveal=False => each viewer sees ONLY their own top card; others shaded
-        render_cards_row(state, round_cards, viewer_idx=my_idx, chosen_attr=None, reveal=False)
+        render_cards_row(state, round_cards, viewer_idx=my_idx, reveal=False)
 
         if is_my_turn:
             st.markdown("### Choose an attribute")
@@ -682,13 +565,12 @@ def main():
         else:
             st.info("Waiting for the active player to choose an attribute (auto-refresh is on).")
 
-    # REVEAL phase (everything visible to everyone)
     elif state["phase"] == "reveal":
         chosen_attr = state["chosen_attr"]
-        st.markdown(f"### Reveal — Attribute: **{DISPLAY.get(chosen_attr, chosen_attr)}**")
+        st.markdown(f"### Reveal — Attribute chosen: **{DISPLAY.get(chosen_attr, chosen_attr)}**")
 
         played_items = {int(pi): card for pi, card in state["played"].items()}
-        render_cards_row(state, played_items, viewer_idx=my_idx, chosen_attr=chosen_attr, reveal=True)
+        render_cards_row(state, played_items, viewer_idx=my_idx, reveal=True)
 
         st.info(state.get("outcome_text", "Round complete."))
 
