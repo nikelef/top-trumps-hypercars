@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh  # ✅ FIXED (use streamlit-autorefresh)
+from streamlit_autorefresh import st_autorefresh
 
 
 # ----------------------------
@@ -86,107 +86,143 @@ def inject_styles():
     st.markdown(
         """
         <style>
-            .main .block-container {
-                max-width: 980px;
+            .main .block-container{
+                max-width: 1180px;
                 padding-top: 1.0rem;
                 padding-bottom: 5.0rem;
             }
 
-            .stButton > button {
+            .stButton > button{
                 width: 100%;
                 min-height: 3rem;
-                border-radius: 0.75rem;
+                border-radius: 0.9rem;
                 font-size: 1rem;
-                font-weight: 600;
+                font-weight: 650;
             }
 
-            .metric-chip {
+            .metric-chip{
                 background: #f2f4f8;
-                border-radius: 12px;
-                padding: 0.55rem 0.7rem;
-                margin-bottom: 0.5rem;
+                border-radius: 14px;
+                padding: 0.65rem 0.9rem;
+                margin-bottom: 0.6rem;
                 text-align: center;
                 border: 1px solid #d6d9df;
+                font-size: 0.98rem;
             }
 
-            .share-box {
+            .share-box{
                 background: #eff7ff;
                 border: 1px solid #b7d5ff;
-                border-radius: 10px;
-                padding: 0.7rem;
-                margin-bottom: 0.8rem;
-                font-size: 0.95rem;
+                border-radius: 12px;
+                padding: 0.85rem 0.9rem;
+                margin-bottom: 0.9rem;
+                font-size: 1rem;
             }
 
-            /* --- Compact card row --- */
-            .tt-row {
+            /* ------- Card row (horizontal, scrollable) ------- */
+            .tt-row{
                 display: flex;
-                gap: 12px;
+                gap: 14px;
                 overflow-x: auto;
-                padding: 8px 2px 12px 2px;
+                overflow-y: hidden;
+                padding: 10px 4px 14px 4px;
                 align-items: stretch;
                 scroll-snap-type: x mandatory;
             }
             .tt-row::-webkit-scrollbar { height: 10px; }
             .tt-row::-webkit-scrollbar-thumb { background: #cfd6e4; border-radius: 10px; }
 
-            .tt-card {
-                width: 200px;
-                min-width: 200px;
+            /* ------- Card ------- */
+            .tt-card{
+                width: 320px;                 /* ✅ bigger */
+                min-width: 320px;
                 background: #ffffff;
-                border: 1px solid #d6d9df;
-                border-radius: 14px;
-                padding: 10px;
-                box-shadow: 0 1px 6px rgba(16, 24, 40, 0.06);
+                border: 2px solid #d6d9df;
+                border-radius: 18px;
+                padding: 12px 12px 12px 12px;
+                box-shadow: 0 2px 10px rgba(16, 24, 40, 0.08);
                 scroll-snap-align: start;
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
+                gap: 10px;
             }
-            .tt-card.active {
-                border: 3px solid #ff2d2d;  /* red frame */
+            .tt-card.active{
+                border: 4px solid #ff2d2d;    /* ✅ strong red frame */
             }
 
-            .tt-name {
-                font-weight: 800;
-                font-size: 0.98rem;
-                line-height: 1.2;
-                margin: 0;
-            }
-            .tt-player {
-                font-weight: 700;
-                font-size: 0.9rem;
+            .tt-player{
+                font-weight: 750;
+                font-size: 1.02rem;
                 opacity: 0.85;
                 margin: 0;
             }
-            .tt-img {
+            .tt-name{
+                font-weight: 900;
+                font-size: 1.15rem;
+                line-height: 1.18;
+                margin: 0;
+            }
+
+            .tt-img{
                 width: 100%;
-                height: 118px;
+                height: 175px;                /* ✅ bigger image */
                 object-fit: cover;
-                border-radius: 12px;
+                border-radius: 14px;
                 border: 1px solid #eef1f6;
             }
-            .tt-attr {
-                font-size: 0.9rem;
-                line-height: 1.25;
+
+            /* ------- Attribute panel ------- */
+            .tt-attrs{
                 background: #f7f8fb;
                 border: 1px solid #e6e9f2;
-                border-radius: 12px;
-                padding: 8px;
+                border-radius: 14px;
+                padding: 10px;
+                display: grid;
+                grid-template-columns: 1fr auto;
+                row-gap: 8px;
+                column-gap: 10px;
+                font-size: 0.98rem;            /* ✅ readable */
+                line-height: 1.2;
             }
-            .tt-attr b { font-weight: 800; }
+            .tt-attrs .k{
+                font-weight: 750;
+                opacity: 0.92;
+            }
+            .tt-attrs .v{
+                font-weight: 850;
+                text-align: right;
+                white-space: nowrap;
+            }
+            .tt-attrs .sep{
+                grid-column: 1 / span 2;
+                height: 1px;
+                background: #e4e8f1;
+                margin: 2px 0;
+            }
 
-            @media (max-width: 768px) {
-                .main .block-container {
+            .tt-chosen{
+                background: #fff2f2;
+                border: 1px solid #ffb3b3;
+                border-radius: 12px;
+                padding: 8px 10px;
+                font-weight: 900;
+                font-size: 1rem;
+            }
+
+            @media (max-width: 768px){
+                .main .block-container{
                     padding-left: 1rem;
                     padding-right: 1rem;
                 }
-                .tt-card {
-                    width: 175px;
-                    min-width: 175px;
+                .tt-card{
+                    width: 285px;
+                    min-width: 285px;
                 }
-                .tt-img {
-                    height: 105px;
+                .tt-img{
+                    height: 155px;
+                }
+                .tt-name{
+                    font-size: 1.08rem;
                 }
             }
         </style>
@@ -300,7 +336,7 @@ def start_new_game(num_players, mobile_layout, owner_client_id):
         "winner": None,
         "round": 1,
         "pot": [],
-        "mobile_layout": mobile_layout,
+        "mobile_layout": mobile_layout,  # kept for compatibility
         "outcome_text": "",
         "seat_claims": {owner_client_id: 0},
         "created_at": now_iso(),
@@ -373,33 +409,64 @@ def get_my_player_index(state, client_id):
     return state.get("seat_claims", {}).get(client_id)
 
 
-def _card_html(player_name: str, card: dict, highlight: bool, attr_key: str | None, show_attr: bool) -> str:
-    cls = "tt-card active" if highlight else "tt-card"
-    img_uri = _img_as_data_uri(card.get("image"))
-    img_html = f"<img class='tt-img' src='{img_uri}' />" if img_uri else ""
-    attr_html = ""
-    if show_attr and attr_key:
-        val = card["attributes"].get(attr_key)
-        disp = DISPLAY.get(attr_key, attr_key)
-        vtxt = "N/A" if val is None else str(val)
-        attr_html = f"<div class='tt-attr'><b>{disp}:</b> {vtxt}</div>"
+def _attrs_html(card: dict, chosen_attr: str | None, show_all: bool) -> str:
+    """
+    Render either:
+      - all attributes (reveal)
+      - or only the chosen attribute (optional)
+    """
+    attrs = card.get("attributes", {})
+    rows = []
+
+    keys = list(RULES.keys()) if show_all else ([chosen_attr] if chosen_attr else [])
+    for idx, k in enumerate(keys):
+        disp = DISPLAY.get(k, k)
+        v = attrs.get(k, None)
+        vtxt = "N/A" if v is None else str(v)
+        rows.append(f"<div class='k'>{disp}</div><div class='v'>{vtxt}</div>")
+        if idx != len(keys) - 1:
+            rows.append("<div class='sep'></div>")
+
+    if not rows:
+        return ""
+
+    chosen_badge = ""
+    if chosen_attr and show_all:
+        chosen_badge = f"<div class='tt-chosen'>Chosen: {DISPLAY.get(chosen_attr, chosen_attr)}</div>"
 
     return f"""
-        <div class="{cls}">
-            <p class="tt-player">{player_name}</p>
-            <p class="tt-name">{card.get('name','(unknown)')}</p>
-            {img_html}
-            {attr_html}
+        {chosen_badge}
+        <div class="tt-attrs">
+            {''.join(rows)}
         </div>
     """
 
 
-def render_round_cards_horizontal(state, card_by_player: dict[int, dict], chosen_attr: str | None, show_attr: bool):
+def _card_html(player_name: str, card: dict, highlight: bool, chosen_attr: str | None, show_attrs: bool) -> str:
+    cls = "tt-card active" if highlight else "tt-card"
+    img_uri = _img_as_data_uri(card.get("image"))
+    img_html = f"<img class='tt-img' src='{img_uri}' />" if img_uri else ""
+
+    attrs_html = _attrs_html(card, chosen_attr=chosen_attr, show_all=show_attrs) if show_attrs else ""
+
+    return f"""
+        <div class="{cls}">
+            <div>
+                <p class="tt-player">{player_name}</p>
+                <p class="tt-name">{card.get('name','(unknown)')}</p>
+            </div>
+            {img_html}
+            {attrs_html}
+        </div>
+    """
+
+
+def render_cards_row(state, card_by_player: dict[int, dict], chosen_attr: str | None, show_attrs: bool):
     items = []
     for pi, card in card_by_player.items():
         pname = state["players"][int(pi)]["name"]
         highlight = int(pi) == int(state["active"])
-        items.append(_card_html(pname, card, highlight, chosen_attr, show_attr))
+        items.append(_card_html(pname, card, highlight, chosen_attr, show_attrs))
     st.markdown("<div class='tt-row'>" + "\n".join(items) + "</div>", unsafe_allow_html=True)
 
 
@@ -418,6 +485,7 @@ def main():
     room_id = params.get("room")
     st.sidebar.subheader("Online room")
 
+    # Lobby
     if not room_id:
         st.subheader("Create or join an online multiplayer room")
 
@@ -430,7 +498,7 @@ def main():
 
         with st.form("create_room"):
             num_players = st.selectbox("Number of players", [2, 3, 4], index=1)
-            mobile_layout = st.toggle("Use compact mobile reveal layout", value=True)
+            mobile_layout = st.toggle("Use compact layout", value=True)
             owner_name = st.text_input("Your name", value="Host")
             create_submitted = st.form_submit_button("Create room")
 
@@ -453,9 +521,10 @@ def main():
                 st.rerun()
         st.stop()
 
+    # In room
     room_id = str(room_id).upper()
 
-    # ✅ Auto-refresh for all players
+    # Auto refresh
     st_autorefresh(interval=1500, key="room_poll")
 
     state = load_room_state(room_id)
@@ -550,6 +619,7 @@ def main():
 
     st.subheader(f"Round {state['round']} — {active_player['name']}'s turn")
 
+    # Choose phase (do NOT reveal attributes)
     if state["phase"] == "choose":
         round_cards = {}
         for pi in alive:
@@ -557,7 +627,7 @@ def main():
                 round_cards[pi] = state["players"][pi]["deck"][0]
 
         st.markdown("### Cards in this round")
-        render_round_cards_horizontal(state, round_cards, chosen_attr=None, show_attr=False)
+        render_cards_row(state, round_cards, chosen_attr=None, show_attrs=False)
 
         if is_my_turn:
             st.markdown("### Choose an attribute")
@@ -609,12 +679,13 @@ def main():
         else:
             st.info("Waiting for the active player to choose an attribute (auto-refresh is on).")
 
+    # Reveal phase (show all attributes clearly, in-card)
     elif state["phase"] == "reveal":
         chosen_attr = state["chosen_attr"]
         st.markdown(f"### Reveal — Attribute: **{DISPLAY.get(chosen_attr, chosen_attr)}**")
 
         played_items = {int(pi): card for pi, card in state["played"].items()}
-        render_round_cards_horizontal(state, played_items, chosen_attr=chosen_attr, show_attr=True)
+        render_cards_row(state, played_items, chosen_attr=chosen_attr, show_attrs=True)
 
         st.info(state.get("outcome_text", "Round complete."))
 
